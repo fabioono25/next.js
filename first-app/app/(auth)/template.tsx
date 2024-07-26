@@ -5,11 +5,14 @@ import { usePathname } from "next/navigation";
 import path from "path";
 import "./styles.css";
 
+import { useState } from "react";
+
 const navLinks = [
   { href: "/", text: "Home" },
   { href: "/blog", text: "Blog" },
   { href: "/products", text: "Products" },
   { href: "/register", text: "Register" },
+  { href: "/login", text: "Login" },
 ];
 
 export default function AuthLayout({
@@ -19,8 +22,13 @@ export default function AuthLayout({
 }) {
   const pathname = usePathname();
 
+  const [input, setInput] = useState("");
+
   return (
     <>
+      <div>
+        <input value={input} onChange={(e) => setInput(e.target.value)} />
+      </div>
       <nav>
         <ul>
           {navLinks.map((link) => {
