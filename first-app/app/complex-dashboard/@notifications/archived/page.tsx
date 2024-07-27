@@ -3,13 +3,13 @@ import React from 'react'
 
 import Link from 'next/link'
 
-function Notifications() {
+function ArchivedNotifications() {
   return (
     <Card>
       <div>Notifications</div>
-      <Link href='/complex-dashboard/archived'>Archived</Link>
+      <Link href='/complex-dashboard'>Default</Link>
     </Card>
   )
 }
 
-export default Notifications
+export default ArchivedNotifications
