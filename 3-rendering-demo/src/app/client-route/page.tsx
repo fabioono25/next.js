@@ -3,19 +3,19 @@
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-// import { useTheme } from "@/components/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 
 // import "./ImageSlider.css";
 
 export default function ClientRoutePage() {
-  // const theme = useTheme();
+  const theme = useTheme();
   return (
     <>
       {/* <h1>ClientRoutePage</h1> */}
       <h1
-        // style={{
-        //   color: theme.colors.secondary,
-        // }}
+        style={{
+          color: theme.colors.primary,
+        }}
       >
         Server Route
       </h1>
