@@ -1,44 +1,11 @@
-# Next.js
-.next/
-out/
+### Project 1:
 
-# Environment variables
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+#### Stack:
 
-# Build files
-node_modules/
-build/
-out/
-.cache/
-public/
+* Next.js 15
+* ShadCN
 
-# Next.js Image Optimization
-# https://nextjs.org/docs/basic-features/image-optimization#disabling-image-optimization
-public/static/images/
+#### Steps:
 
-# IDE files
-.idea/
-.vscode/
-*.sublime-project
-*.sublime-workspace
-
-# Logs
-logs
-*.log
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Testing
-coverage/
-__tests__/
-test/
-
-# Dependency directories
-puppeteer/
-node_modules/
-jspm_packages/
+1. Bootstrapping the Next.js project
+2.
