@@ -3,8 +3,8 @@
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import React from "react";
-import AddPostButton from "./AddPostButton";
 import { addPost } from "@/lib/actions";
+import AddPostButton from "../AddPostButton";
 
 const AddPost = () => {
   const { user } = useUser();
