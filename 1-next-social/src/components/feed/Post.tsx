@@ -1,90 +1,70 @@
 import Image from "next/image";
-import React from "react";
+import React, { Suspense } from "react";
 import Comments from "./Comments";
+import { Post as PostType, User } from "@prisma/client";
+import { auth } from "@clerk/nextjs/server";
+import PostInfo from "./PostInfo";
+import PostInteraction from "./PostInteraction";
 
-const Post = () => {
+// type FeedPostType = PostType & { user: User } & {
+//   likes: [{ userId: string }];
+// } & {
+//   _count: { comments: number };
+// };
+
+interface FeedPostType extends PostType {
+  user: User;
+  likes: [{ userId: string }];
+  _count: { comments: number };
+}
+
+const Post = async ({ post }: { post: FeedPostType }) => {
+  const { userId } = await auth();
   return (
     <div className="flex flex-col gap-4">
       {/* USER */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Image
-            src={"/noAvatar.png"}
+            src={post.user.avatar || "/noAvatar.png"}
             width={40}
             height={40}
             alt=""
             className="w-10 h-10 rounded-full"
           />
-          <span className="font-medium">Name</span>
+          <span className="font-medium">
+            {post.user.name && post.user.surname
+              ? post.user.name + " " + post.user.surname
+              : post.user.username}
+          </span>
         </div>
-        <Image src="/more.png" width={20} height={20} alt="" />
+        {userId === post.user.id && <PostInfo postId={post.id} />}
       </div>
       {/* DESC */}
       <div className="flex flex-col gap-4">
-        <div className="w-full min-h-96 relative">
-          <Image
-            src={
-              "https://images.pexels.com/photos/28948420/pexels-photo-28948420/free-photo-of-gothic-cathedral-reflection-in-puddle-on-cobblestone.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            }
-            alt=""
-            fill
-            className="object-cover rounded-md"
-          />
-        </div>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nobis
-          necessitatibus quas voluptatem pariatur rerum rem quasi a temporibus
-          magni. Cumque unde quis dolore autem iusto rerum ratione est odit
-          mollitia?
-        </p>
+        {post.img && (
+          <div className="w-full min-h-96 relative">
+            <Image
+              src={post.img}
+              fill
+              className="object-cover rounded-md"
+              alt=""
+            />
+          </div>
+        )}
+        <p>{post.desc}</p>
       </div>
       {/* INTERACTION */}
-      <div className="flex items-center justify-between text-sm my-4">
-        <div className="flex gap-8">
-          <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-xl">
-            <Image
-              src="/like.png"
-              width={20}
-              height={20}
-              alt=""
-              className="cursor-pointer"
-            />
-            <span className="text-gray-300">|</span>
-            <span className="text-gray-500">
-              300<span className="hidden md:inline p-1">Likes</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-xl">
-            <Image
-              src="/comment.png"
-              width={20}
-              height={20}
-              alt=""
-              className="cursor-pointer"
-            />
-            <span className="text-gray-300">|</span>
-            <span className="text-gray-500">
-              300<span className="hidden md:inline p-1">Comments</span>
-            </span>
-          </div>
-        </div>
-        <div className="">
-          <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-xl">
-            <Image
-              src="/share.png"
-              width={20}
-              height={20}
-              alt=""
-              className="cursor-pointer"
-            />
-            <span className="text-gray-300">|</span>
-            <span className="text-gray-500">
-              300<span className="hidden md:inline p-1">Shares</span>
-            </span>
-          </div>
-        </div>
-      </div>
-      <Comments />
+      <Suspense fallback="Loading...">
+        <PostInteraction
+          postId={post.id}
+          likes={post.likes.map((like) => like.userId)}
+          commentNumber={post._count.comments}
+        />
+      </Suspense>
+      <Suspense fallback="Loading...">
+        <Comments postId={post.id} />
+      </Suspense>
     </div>
   );
 };
