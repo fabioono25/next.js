@@ -44,6 +44,8 @@ const UserInfoCardInteraction = ({
     } catch (err) {}
   };
 
+  // improvement: add a "Sending Request" message
+
   const [optimisticState, switchOptimisticState] = useOptimistic(
     userState,
     (state, value: "follow" | "block") =>

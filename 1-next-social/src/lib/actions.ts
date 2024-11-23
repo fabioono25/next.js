@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import prisma from "./client";
+import { z } from "zod";
 
 export const addPost = async (formData: FormData) => {
   const desc = formData.get("desc") as string;
@@ -9,29 +10,31 @@ export const addPost = async (formData: FormData) => {
 
   if (!userId) throw new Error("User is not authenticated!");
 
-// just a test using Prisma
-//   try {
-//     const test = await prisma.post.create({
-//       data: {
-//         desc,
-//         userId: userId,
-//       },
-//     });
-//     console.log(test);
-//   } catch (error) {
-//     console.error("Failed to send post", error);
-//   }
+  // just a test using Prisma
+  //   try {
+  //     const test = await prisma.post.create({
+  //       data: {
+  //         desc,
+  //         userId: userId,
+  //       },
+  //     });
+  //     console.log(test);
+  //   } catch (error) {
+  //     console.error("Failed to send post", error);
+  //   }
 };
 
-
-// explaining the code: 
+// explaining the code:
 // 1. Check if the user is already following the user
 // 2. If the user is following, delete the follow
 // 3. If the user is not following, check if there is a follow request
 // 4. If there is a follow request, delete the follow request
 // 5. If there is no follow request, create a follow request
 export const switchFollow = async (userId: string) => {
+  console.log("userId: ", userId);
   const { userId: currentUserId } = await auth();
+
+  console.log("currentUserId: ", currentUserId);
 
   if (!currentUserId) {
     throw new Error("User is not authenticated!");
@@ -115,118 +118,117 @@ export const switchBlock = async (userId: string) => {
   }
 };
 
-// export const acceptFollowRequest = async (userId: string) => {
-//   const { userId: currentUserId } = auth();
+export const acceptFollowRequest = async (userId: string) => {
+  const { userId: currentUserId } = await auth();
 
-//   if (!currentUserId) {
-//     throw new Error("User is not Authenticated!!");
-//   }
+  if (!currentUserId) {
+    throw new Error("User is not Authenticated!!");
+  }
 
-//   try {
-//     const existingFollowRequest = await prisma.followRequest.findFirst({
-//       where: {
-//         senderId: userId,
-//         receiverId: currentUserId,
-//       },
-//     });
+  try {
+    const existingFollowRequest = await prisma.followRequest.findFirst({
+      where: {
+        senderId: userId,
+        receiverId: currentUserId,
+      },
+    });
 
-//     if (existingFollowRequest) {
-//       await prisma.followRequest.delete({
-//         where: {
-//           id: existingFollowRequest.id,
-//         },
-//       });
+    if (existingFollowRequest) {
+      await prisma.followRequest.delete({
+        where: {
+          id: existingFollowRequest.id,
+        },
+      });
 
-//       await prisma.follower.create({
-//         data: {
-//           followerId: userId,
-//           followingId: currentUserId,
-//         },
-//       });
-//     }
-//   } catch (err) {
-//     console.log(err);
-//     throw new Error("Something went wrong!");
-//   }
-// };
+      await prisma.follower.create({
+        data: {
+          followerId: userId,
+          followingId: currentUserId,
+        },
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    throw new Error("Something went wrong!");
+  }
+};
 
-// export const declineFollowRequest = async (userId: string) => {
-//   const { userId: currentUserId } = auth();
+export const declineFollowRequest = async (userId: string) => {
+  const { userId: currentUserId } = await auth();
 
-//   if (!currentUserId) {
-//     throw new Error("User is not Authenticated!!");
-//   }
+  if (!currentUserId) {
+    throw new Error("User is not Authenticated!!");
+  }
 
-//   try {
-//     const existingFollowRequest = await prisma.followRequest.findFirst({
-//       where: {
-//         senderId: userId,
-//         receiverId: currentUserId,
-//       },
-//     });
+  try {
+    const existingFollowRequest = await prisma.followRequest.findFirst({
+      where: {
+        senderId: userId,
+        receiverId: currentUserId,
+      },
+    });
 
-//     if (existingFollowRequest) {
-//       await prisma.followRequest.delete({
-//         where: {
-//           id: existingFollowRequest.id,
-//         },
-//       });
-//     }
-//   } catch (err) {
-//     console.log(err);
-//     throw new Error("Something went wrong!");
-//   }
-// };
+    if (existingFollowRequest) {
+      await prisma.followRequest.delete({
+        where: {
+          id: existingFollowRequest.id,
+        },
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    throw new Error("Something went wrong!");
+  }
+};
 
-// export const updateProfile = async (
-//   prevState: { success: boolean; error: boolean },
-//   payload: { formData: FormData; cover: string }
-// ) => {
-//   const { formData, cover } = payload;
-//   const fields = Object.fromEntries(formData);
+export const updateProfile = async (
+  prevState: { success: boolean; error: boolean },
+  payload: { formData: FormData; cover: string }
+) => {
+  const { formData, cover } = payload;
+  const fields = Object.fromEntries(formData);
 
-//   const filteredFields = Object.fromEntries(
-//     Object.entries(fields).filter(([_, value]) => value !== "")
-//   );
+  const filteredFields = Object.fromEntries(
+    Object.entries(fields).filter(([_, value]) => value !== "")
+  );
 
-//   const Profile = z.object({
-//     cover: z.string().optional(),
-//     name: z.string().max(60).optional(),
-//     surname: z.string().max(60).optional(),
-//     description: z.string().max(255).optional(),
-//     city: z.string().max(60).optional(),
-//     school: z.string().max(60).optional(),
-//     work: z.string().max(60).optional(),
-//     website: z.string().max(60).optional(),
-//   });
+  const Profile = z.object({
+    cover: z.string().optional(),
+    name: z.string().max(60).optional(),
+    surname: z.string().max(60).optional(),
+    description: z.string().max(255).optional(),
+    city: z.string().max(60).optional(),
+    school: z.string().max(60).optional(),
+    work: z.string().max(60).optional(),
+    website: z.string().max(60).optional(),
+  });
 
-//   const validatedFields = Profile.safeParse({ cover, ...filteredFields });
+  const validatedFields = Profile.safeParse({ cover, ...filteredFields });
 
-//   if (!validatedFields.success) {
-//     console.log(validatedFields.error.flatten().fieldErrors);
-//     return { success: false, error: true };
-//   }
+  if (!validatedFields.success) {
+    console.log(validatedFields.error.flatten().fieldErrors);
+    return { success: false, error: true };
+  }
 
-//   const { userId } = auth();
+  const { userId } = await auth();
 
-//   if (!userId) {
-//     return { success: false, error: true };
-//   }
+  if (!userId) {
+    return { success: false, error: true };
+  }
 
-//   try {
-//     await prisma.user.update({
-//       where: {
-//         id: userId,
-//       },
-//       data: validatedFields.data,
-//     });
-//     return { success: true, error: false };
-//   } catch (err) {
-//     console.log(err);
-//     return { success: false, error: true };
-//   }
-// };
-
+  try {
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: validatedFields.data,
+    });
+    return { success: true, error: false };
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: true };
+  }
+};
 // export const switchLike = async (postId: number) => {
 //   const { userId } = auth();
 
