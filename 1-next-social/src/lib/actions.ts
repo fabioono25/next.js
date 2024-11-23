@@ -3,25 +3,37 @@
 import { auth } from "@clerk/nextjs/server";
 import prisma from "./client";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
-export const addPost = async (formData: FormData) => {
+export const addPost = async (formData: FormData, img: string) => {
   const desc = formData.get("desc") as string;
+
+  const Desc = z.string().min(1).max(255);
+
+  const validatedDesc = Desc.safeParse(desc);
+
+  if (!validatedDesc.success) {
+    //TODO
+    console.log("description is not valid");
+    return;
+  }
   const { userId } = await auth();
 
   if (!userId) throw new Error("User is not authenticated!");
 
-  // just a test using Prisma
-  //   try {
-  //     const test = await prisma.post.create({
-  //       data: {
-  //         desc,
-  //         userId: userId,
-  //       },
-  //     });
-  //     console.log(test);
-  //   } catch (error) {
-  //     console.error("Failed to send post", error);
-  //   }
+  try {
+    await prisma.post.create({
+      data: {
+        desc: validatedDesc.data,
+        userId,
+        img,
+      },
+    });
+
+    revalidatePath("/");
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 // explaining the code:
@@ -298,44 +310,44 @@ export const deletePost = async (postId: number) => {
         userId,
       },
     });
-    //revalidatePath("/")
+    revalidatePath("/");
   } catch (err) {
     console.log(err);
   }
 };
 
-// export const addStory = async (img: string) => {
-//   const { userId } = auth();
+export const addStory = async (img: string) => {
+  const { userId } = await auth();
 
-//   if (!userId) throw new Error("User is not authenticated!");
+  if (!userId) throw new Error("User is not authenticated!");
 
-//   try {
-//     const existingStory = await prisma.story.findFirst({
-//       where: {
-//         userId,
-//       },
-//     });
+  try {
+    const existingStory = await prisma.story.findFirst({
+      where: {
+        userId,
+      },
+    });
 
-//     if (existingStory) {
-//       await prisma.story.delete({
-//         where: {
-//           id: existingStory.id,
-//         },
-//       });
-//     }
-//     const createdStory = await prisma.story.create({
-//       data: {
-//         userId,
-//         img,
-//         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-//       },
-//       include: {
-//         user: true,
-//       },
-//     });
+    if (existingStory) {
+      await prisma.story.delete({
+        where: {
+          id: existingStory.id,
+        },
+      });
+    }
+    const createdStory = await prisma.story.create({
+      data: {
+        userId,
+        img,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+      include: {
+        user: true,
+      },
+    });
 
-//     return createdStory;
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
+    return createdStory;
+  } catch (err) {
+    console.log(err);
+  }
+};

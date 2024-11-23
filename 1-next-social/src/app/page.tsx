@@ -1,4 +1,4 @@
-import AddPost from "@/components/feed/AddPost";
+import AddPost from "@/components/AddPost";
 import Feed from "@/components/feed/Feed";
 import LeftMenu from "@/components/leftMenu/LeftMenu";
 import RightMenu from "@/components/RightMeny";
