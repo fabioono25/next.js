@@ -22,7 +22,7 @@ export default async function Home({
   // const posts = await client.fetch(STARTUPS_QUERY);
   const { data: posts } = await sanityFetch({ query: STARTUPS_QUERY, params });
 
-  console.log(JSON.stringify(posts, null, 2));
+  // console.log(JSON.stringify(posts, null, 2));
 
   // const posts = [
   //   {
